@@ -18,7 +18,7 @@ provider "azurerm" {
   
   # Disable automatic resource provider registration
   # This is needed when the service principal doesn't have subscription-level permissions
-  resource_provider_registrations = "none"
+  skip_provider_registration = true
 }
 
 data "azurerm_resource_group" "main" {
