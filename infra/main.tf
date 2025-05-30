@@ -15,6 +15,10 @@ provider "azurerm" {
   use_cli = false
   use_msi = false
   use_oidc = true
+  
+  # Disable automatic resource provider registration
+  # This is needed when the service principal doesn't have subscription-level permissions
+  resource_provider_registrations = "none"
 }
 
 data "azurerm_resource_group" "main" {
