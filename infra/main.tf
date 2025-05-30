@@ -10,6 +10,11 @@ terraform {
 
 provider "azurerm" {
   features {}
+  
+  # Use OIDC authentication in CI/CD
+  use_cli = false
+  use_msi = false
+  use_oidc = true
 }
 
 data "azurerm_resource_group" "main" {
