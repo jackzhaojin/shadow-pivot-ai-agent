@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "triggers": {
+    "manual": {
+      "type": "Request",
+      "kind": "Http",
+      "inputs": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "type": "string"
+            },
+            "userId": {
+              "type": "string"
+            },
+            "sessionId": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "actions": {
+    "Response": {
+      "type": "Response",
+      "kind": "Http",
+      "inputs": {
+        "statusCode": 202,
+        "body": {
+          "status": "accepted",
+          "message": "AI agent task queued for processing",
+          "taskId": "@{guid()}",
+          "userId": "@{triggerBody()['userId']}",
+          "sessionId": "@{coalesce(triggerBody()['sessionId'], guid())}",
+          "timestamp": "@{utcNow()}",
+          "estimatedProcessingTime": "2-5 minutes"
+        }
+      },
+      "runAfter": {}
+    }
+  },
+  "outputs": {}
+}

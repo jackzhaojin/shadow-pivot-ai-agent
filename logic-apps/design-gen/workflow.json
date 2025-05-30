@@ -1,0 +1,90 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "triggers": {
+    "When_a_new_message_is_received_in_a_queue": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['azurequeues']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/queues/@{encodeURIComponent('design-gen-q')}/message_trigger"
+      },
+      "recurrence": {
+        "frequency": "Second",
+        "interval": 30
+      }
+    }
+  },
+  "actions": {
+    "Parse_message": {
+      "type": "ParseJson",
+      "inputs": {
+        "content": "@triggerBody()?['MessageText']",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "taskId": {"type": "string"},
+            "prompt": {"type": "string"},
+            "userId": {"type": "string"},
+            "sessionId": {"type": "string"},
+            "priority": {"type": "string"},
+            "timestamp": {"type": "string"}
+          }
+        }
+      },
+      "runAfter": {}
+    },
+    "Generate_design": {
+      "type": "Http",
+      "inputs": {
+        "method": "POST",
+        "uri": "https://api.openai.com/v1/chat/completions",
+        "headers": {
+          "Authorization": "Bearer @{parameters('openai_api_key')}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "model": "gpt-4",
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a design expert. Create detailed design specifications based on user requirements."
+            },
+            {
+              "role": "user",
+              "content": "@{body('Parse_message')?['prompt']}"
+            }
+          ],
+          "max_tokens": 2000
+        }
+      },
+      "runAfter": {
+        "Parse_message": ["Succeeded"]
+      }
+    },
+    "Queue_for_content_generation": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['azurequeues']['connectionId']"
+          }
+        },
+        "method": "post",
+        "path": "/queues/@{encodeURIComponent('content-gen-q')}/messages",
+        "body": {
+          "MessageText": "@{json(string(union(body('Parse_message'), json(concat('{\"designOutput\":\"', replace(body('Generate_design')?['choices']?[0]?['message']?['content'], '\"', '\\\"'), '\",\"stage\":\"content-generation\"}'))))}"
+        }
+      },
+      "runAfter": {
+        "Generate_design": ["Succeeded"]
+      }
+    }
+  },
+  "outputs": {}
+}

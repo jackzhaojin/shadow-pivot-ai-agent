@@ -1,0 +1,97 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "triggers": {
+    "When_a_new_message_is_received_in_a_queue": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['azurequeues']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/queues/@{encodeURIComponent('review-q')}/message_trigger"
+      },
+      "recurrence": {
+        "frequency": "Second",
+        "interval": 30
+      }
+    }
+  },
+  "actions": {
+    "Parse_message": {
+      "type": "ParseJson",
+      "inputs": {
+        "content": "@triggerBody()?['MessageText']",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "taskId": {"type": "string"},
+            "prompt": {"type": "string"},
+            "userId": {"type": "string"},
+            "sessionId": {"type": "string"},
+            "designOutput": {"type": "string"},
+            "contentOutput": {"type": "string"},
+            "timestamp": {"type": "string"}
+          }
+        }
+      },
+      "runAfter": {}
+    },
+    "Review_and_finalize": {
+      "type": "Http",
+      "inputs": {
+        "method": "POST",
+        "uri": "https://api.openai.com/v1/chat/completions",
+        "headers": {
+          "Authorization": "Bearer @{parameters('openai_api_key')}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "model": "gpt-4",
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a quality assurance expert. Review and provide final recommendations for the generated content."
+            },
+            {
+              "role": "user",
+              "content": "Original Request: @{body('Parse_message')?['prompt']} \n\nDesign: @{body('Parse_message')?['designOutput']} \n\nContent: @{body('Parse_message')?['contentOutput']}"
+            }
+          ],
+          "max_tokens": 2000
+        }
+      },
+      "runAfter": {
+        "Parse_message": ["Succeeded"]
+      }
+    },
+    "Store_final_result": {
+      "type": "Http",
+      "inputs": {
+        "method": "POST",
+        "uri": "https://your-callback-endpoint.com/results",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "taskId": "@{body('Parse_message')?['taskId']}",
+          "userId": "@{body('Parse_message')?['userId']}",
+          "sessionId": "@{body('Parse_message')?['sessionId']}",
+          "originalPrompt": "@{body('Parse_message')?['prompt']}",
+          "design": "@{body('Parse_message')?['designOutput']}",
+          "content": "@{body('Parse_message')?['contentOutput']}",
+          "review": "@{body('Review_and_finalize')?['choices']?[0]?['message']?['content']}",
+          "status": "completed",
+          "completedAt": "@{utcNow()}"
+        }
+      },
+      "runAfter": {
+        "Review_and_finalize": ["Succeeded"]
+      }
+    }
+  },
+  "outputs": {}
+}
