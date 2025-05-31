@@ -21,7 +21,7 @@ resource "azurerm_cognitive_account" "ai_foundry" {
 
   # Enable managed identity authentication
   identity {
-    type = "SystemAssigned, UserAssigned"
+    type         = "SystemAssigned, UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.logic_apps_identity.id]
   }
 

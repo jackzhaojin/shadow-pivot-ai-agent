@@ -10,7 +10,7 @@ terraform {
     }
   }
   required_version = ">= 1.3.0"
-    # Remote state backend
+  # Remote state backend
   backend "azurerm" {
     resource_group_name  = "ShadowPivot"
     storage_account_name = "shadowpivotterraform"
@@ -21,12 +21,12 @@ terraform {
 
 provider "azurerm" {
   features {}
-  
+
   # Use OIDC authentication in CI/CD
-  use_cli = false
-  use_msi = false
+  use_cli  = false
+  use_msi  = false
   use_oidc = true
-  
+
   # Enable automatic resource provider registration
   # This requires subscription-level permissions for the service principal
   skip_provider_registration = false
