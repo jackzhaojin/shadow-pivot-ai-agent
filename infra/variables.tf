@@ -3,9 +3,8 @@ variable "resource_group_name" {
   type        = string
 }
 
-variable "openai_api_key" {
-  description = "OpenAI API Key for Logic Apps"
+variable "ai_foundry_location" {
+  description = "The Azure region for AI Foundry deployment"
   type        = string
-  sensitive   = true
-  default     = ""
+  default     = "East US"
 }

@@ -1,14 +1,22 @@
 # Shadow Pivot AI Agent
 
-This project implements an Azure-based AI agent system using Terraform for infrastructure provisioning and GitHub Actions for automated deployment of Logic Apps.
+This project implements an Azure-based AI agent system using Terraform for infrastructure provisioning, Azure AI Foundry for AI services, and GitHub Actions for automated deployment of Logic Apps.
 
 ## 🏗️ Architecture
 
 The system uses:
-- **Terraform** for infrastructure as code (Storage Account, Queues)
-- **Azure Logic Apps** for workflow orchestration
+- **Terraform** for infrastructure as code (Storage Account, Queues, AI Foundry)
+- **Azure Logic Apps** for workflow orchestration  
+- **Azure AI Foundry** with User-Assigned Managed Identity for secure AI services
 - **GitHub Actions** for CI/CD automation
 - **Azure Storage Queues** for message passing between AI steps
+
+## 🔐 Security Features
+
+- **Managed Identity Authentication**: No API keys required
+- **Azure AD Integration**: Secure authentication to AI services
+- **RBAC**: Principle of least privilege access control
+- **Azure-native Security**: Full integration with Azure security ecosystem
 
 ## 📁 Project Structure
 
@@ -46,16 +54,20 @@ shadow-pivot-ai-agent/
 1. Azure subscription with appropriate permissions
 2. GitHub repository with the following secrets configured:
    - `AZURE_CLIENT_ID`
-   - `AZURE_SUBSCRIPTION_ID`
+   - `AZURE_SUBSCRIPTION_ID` 
    - `AZURE_TENANT_ID`
+
+**Note**: No OpenAI API key required - the system uses Azure AI Foundry with managed identity!
 
 ### Deployment Process
 
 1. **Infrastructure Deployment**: Push to `main` branch triggers Terraform to provision:
-   - Storage Account (`shdwagentstorage`)
-   - Storage Queue (`design-gen-q`)
+   - Storage Account and Queues
+   - Azure AI Foundry (OpenAI Service)
+   - User-Assigned Managed Identity
+   - Logic Apps with proper RBAC assignments
 
-2. **Logic App Deployment**: Deploys workflow definitions using Azure CLI
+2. **Automatic Workflow Deployment**: Terraform deploys all Logic App workflow definitions
 
 ### Manual Deployment
 

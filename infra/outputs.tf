@@ -59,3 +59,29 @@ output "storage_connection_id" {
   description = "The ID of the storage queues API connection"
   value       = azurerm_api_connection.storage_queues.id
 }
+
+# AI Foundry Outputs
+output "ai_foundry_endpoint" {
+  description = "The endpoint URL for Azure AI Foundry"
+  value       = azurerm_cognitive_account.ai_foundry.endpoint
+}
+
+output "ai_foundry_name" {
+  description = "The name of the Azure AI Foundry resource"
+  value       = azurerm_cognitive_account.ai_foundry.name
+}
+
+output "managed_identity_client_id" {
+  description = "The client ID of the user-assigned managed identity"
+  value       = azurerm_user_assigned_identity.logic_apps_identity.client_id
+}
+
+output "managed_identity_principal_id" {
+  description = "The principal ID of the user-assigned managed identity"
+  value       = azurerm_user_assigned_identity.logic_apps_identity.principal_id
+}
+
+output "gpt4_deployment_name" {
+  description = "The name of the GPT-4 deployment in AI Foundry"
+  value       = azurerm_cognitive_deployment.gpt4.name
+}

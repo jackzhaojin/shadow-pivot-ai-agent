@@ -21,6 +21,12 @@ resource "azurerm_logic_app_workflow" "entry" {
   location            = data.azurerm_resource_group.main.location
   resource_group_name = data.azurerm_resource_group.main.name
 
+  # Assign the managed identity
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.logic_apps_identity.id]
+  }
+
   tags = {
     Environment = "production"
     Project     = "shadow-pivot-ai-agent"
@@ -33,6 +39,12 @@ resource "azurerm_logic_app_workflow" "design_gen" {
   name                = "design-gen-step"
   location            = data.azurerm_resource_group.main.location
   resource_group_name = data.azurerm_resource_group.main.name
+
+  # Assign the managed identity
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.logic_apps_identity.id]
+  }
 
   tags = {
     Environment = "production"
@@ -47,6 +59,12 @@ resource "azurerm_logic_app_workflow" "content_gen" {
   location            = data.azurerm_resource_group.main.location
   resource_group_name = data.azurerm_resource_group.main.name
 
+  # Assign the managed identity
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.logic_apps_identity.id]
+  }
+
   tags = {
     Environment = "production"
     Project     = "shadow-pivot-ai-agent"
@@ -59,6 +77,12 @@ resource "azurerm_logic_app_workflow" "review" {
   name                = "review-step"
   location            = data.azurerm_resource_group.main.location
   resource_group_name = data.azurerm_resource_group.main.name
+
+  # Assign the managed identity
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.logic_apps_identity.id]
+  }
 
   tags = {
     Environment = "production"
