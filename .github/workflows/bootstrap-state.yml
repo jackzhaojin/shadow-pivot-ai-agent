@@ -1,0 +1,94 @@
+name: Bootstrap Terraform State Storage
+
+on:
+  workflow_call:
+    inputs:
+      storage_account_name:
+        description: 'Name of the storage account for Terraform state'
+        required: false
+        type: string
+        default: 'shadowpivotterraformstate'
+      container_name:
+        description: 'Name of the container for Terraform state'
+        required: false
+        type: string
+        default: 'tfstate'
+      resource_group_name:
+        description: 'Name of the resource group'
+        required: false
+        type: string
+        default: 'ShadowPivot'
+      location:
+        description: 'Azure region for the storage account'
+        required: false
+        type: string
+        default: 'eastus'
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_USE_OIDC: true
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    outputs:
+      storage_account_name: ${{ inputs.storage_account_name }}
+      container_name: ${{ inputs.container_name }}
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Create Terraform State Storage Account
+        run: |
+          echo "🚀 Bootstrapping Terraform state storage..."
+          
+          # Check if storage account exists
+          if az storage account show --name ${{ inputs.storage_account_name }} --resource-group ${{ inputs.resource_group_name }} >/dev/null 2>&1; then
+            echo "✅ Storage account '${{ inputs.storage_account_name }}' already exists"
+          else
+            echo "📦 Creating storage account '${{ inputs.storage_account_name }}'..."
+            az storage account create \
+              --name ${{ inputs.storage_account_name }} \
+              --resource-group ${{ inputs.resource_group_name }} \
+              --location ${{ inputs.location }} \
+              --sku Standard_LRS \
+              --kind StorageV2 \
+              --allow-blob-public-access false \
+              --min-tls-version TLS1_2 \
+              --tags \
+                Environment=production \
+                Project=shadow-pivot-ai-agent \
+                Purpose="Terraform state storage"
+            echo "✅ Storage account created successfully"
+          fi
+          
+          # Check if container exists
+          if az storage container show --name ${{ inputs.container_name }} --account-name ${{ inputs.storage_account_name }} >/dev/null 2>&1; then
+            echo "✅ Container '${{ inputs.container_name }}' already exists"
+          else
+            echo "📁 Creating container '${{ inputs.container_name }}'..."
+            az storage container create \
+              --name ${{ inputs.container_name }} \
+              --account-name ${{ inputs.storage_account_name }} \
+              --public-access off
+            echo "✅ Container created successfully"
+          fi
+          
+          echo "🎉 Terraform state storage bootstrap complete!"

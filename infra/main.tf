@@ -10,6 +10,14 @@ terraform {
     }
   }
   required_version = ">= 1.3.0"
+  
+  # Remote state backend
+  backend "azurerm" {
+    resource_group_name  = "ShadowPivot"
+    storage_account_name = "shadowpivotterraformstate"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
@@ -20,9 +28,9 @@ provider "azurerm" {
   use_msi = false
   use_oidc = true
   
-  # Disable automatic resource provider registration
-  # This is needed when the service principal doesn't have subscription-level permissions
-  skip_provider_registration = true
+  # Enable automatic resource provider registration
+  # This requires subscription-level permissions for the service principal
+  skip_provider_registration = false
 }
 
 # Data sources
