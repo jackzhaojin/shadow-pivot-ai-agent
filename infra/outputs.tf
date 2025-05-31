@@ -33,3 +33,29 @@ output "ai_artifacts_container_name" {
   description = "The name of the AI artifacts storage container"
   value       = azurerm_storage_container.ai_artifacts.name
 }
+
+# Logic App Outputs
+output "entry_logic_app_id" {
+  description = "The ID of the entry logic app workflow"
+  value       = azurerm_logic_app_workflow.entry.id
+}
+
+output "design_gen_logic_app_id" {
+  description = "The ID of the design generation logic app workflow"
+  value       = azurerm_logic_app_workflow.design_gen.id
+}
+
+output "content_gen_logic_app_id" {
+  description = "The ID of the content generation logic app workflow"
+  value       = azurerm_logic_app_workflow.content_gen.id
+}
+
+output "review_logic_app_id" {
+  description = "The ID of the review logic app workflow"
+  value       = azurerm_logic_app_workflow.review.id
+}
+
+output "storage_connection_id" {
+  description = "The ID of the storage queues API connection"
+  value       = azurerm_api_connection.storage_queues.id
+}

@@ -1,4 +1,4 @@
-name: Deploy Infra
+name: Deploy Infrastructure
 
 on:
   push:
@@ -33,5 +33,11 @@ jobs:
       - name: Terraform Init
         run: terraform -chdir=infra init
 
+      - name: Terraform Validate
+        run: terraform -chdir=infra validate
+
+      - name: Terraform Plan
+        run: terraform -chdir=infra plan -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}"
+
       - name: Terraform Apply
-        run: terraform -chdir=infra apply -auto-approve
+        run: terraform -chdir=infra apply -auto-approve -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}"
