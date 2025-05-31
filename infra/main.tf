@@ -10,11 +10,10 @@ terraform {
     }
   }
   required_version = ">= 1.3.0"
-  
-  # Remote state backend
+    # Remote state backend
   backend "azurerm" {
     resource_group_name  = "ShadowPivot"
-    storage_account_name = "shadowpivotterraformstate"
+    storage_account_name = "shadowpivotterraform"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
   }
