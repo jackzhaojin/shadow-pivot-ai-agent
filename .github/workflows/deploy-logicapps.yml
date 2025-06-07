@@ -105,17 +105,7 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name entry-agent-step \
             --definition @logic-apps/entry/workflow.json \
-            --parameters '{
-              "$connections": {
-                "value": {
-                  "azurequeues": {
-                    "connectionId": "${{ steps.infra-outputs.outputs.storage_connection_id }}",
-                    "connectionName": "azurequeues",
-                    "id": "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"
-                  }
-                }
-              }
-            }'
+            --parameters '{"$connections":{"value":{"azurequeues":{"connectionId":"${{ steps.infra-outputs.outputs.storage_connection_id }}","connectionName":"azurequeues","id":"/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"}}}}'
           
           echo "✅ Entry Logic App workflow deployed successfully."
 
@@ -127,26 +117,7 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name design-gen-step \
             --definition @logic-apps/design-gen/workflow.json \
-            --parameters '{
-              "$connections": {
-                "value": {
-                  "azurequeues": {
-                    "connectionId": "${{ steps.infra-outputs.outputs.storage_connection_id }}",
-                    "connectionName": "azurequeues",
-                    "id": "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"
-                  }
-                }
-              },
-              "ai_foundry_endpoint": {
-                "value": "${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"
-              },
-              "gpt4_deployment_name": {
-                "value": "${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"
-              },
-              "managed_identity_client_id": {
-                "value": "${{ steps.infra-outputs.outputs.managed_identity_client_id }}"
-              }
-            }'
+            --parameters '{"$connections":{"value":{"azurequeues":{"connectionId":"${{ steps.infra-outputs.outputs.storage_connection_id }}","connectionName":"azurequeues","id":"/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"}}},"ai_foundry_endpoint":{"value":"${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"},"gpt4_deployment_name":{"value":"${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"},"managed_identity_client_id":{"value":"${{ steps.infra-outputs.outputs.managed_identity_client_id }}"}}'
           
           echo "✅ Design Generation Logic App workflow deployed successfully."
 
@@ -158,26 +129,7 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name content-gen-step \
             --definition @logic-apps/content-gen/workflow.json \
-            --parameters '{
-              "$connections": {
-                "value": {
-                  "azurequeues": {
-                    "connectionId": "${{ steps.infra-outputs.outputs.storage_connection_id }}",
-                    "connectionName": "azurequeues",
-                    "id": "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"
-                  }
-                }
-              },
-              "ai_foundry_endpoint": {
-                "value": "${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"
-              },
-              "gpt4_deployment_name": {
-                "value": "${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"
-              },
-              "managed_identity_client_id": {
-                "value": "${{ steps.infra-outputs.outputs.managed_identity_client_id }}"
-              }
-            }'
+            --parameters '{"$connections":{"value":{"azurequeues":{"connectionId":"${{ steps.infra-outputs.outputs.storage_connection_id }}","connectionName":"azurequeues","id":"/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"}}},"ai_foundry_endpoint":{"value":"${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"},"gpt4_deployment_name":{"value":"${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"},"managed_identity_client_id":{"value":"${{ steps.infra-outputs.outputs.managed_identity_client_id }}"}}'
           
           echo "✅ Content Generation Logic App workflow deployed successfully."
 
@@ -189,26 +141,7 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name review-step \
             --definition @logic-apps/review/workflow.json \
-            --parameters '{
-              "$connections": {
-                "value": {
-                  "azurequeues": {
-                    "connectionId": "${{ steps.infra-outputs.outputs.storage_connection_id }}",
-                    "connectionName": "azurequeues",
-                    "id": "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"
-                  }
-                }
-              },
-              "ai_foundry_endpoint": {
-                "value": "${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"
-              },
-              "gpt4_deployment_name": {
-                "value": "${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"
-              },
-              "managed_identity_client_id": {
-                "value": "${{ steps.infra-outputs.outputs.managed_identity_client_id }}"
-              }
-            }'
+            --parameters '{"$connections":{"value":{"azurequeues":{"connectionId":"${{ steps.infra-outputs.outputs.storage_connection_id }}","connectionName":"azurequeues","id":"/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"}}},"ai_foundry_endpoint":{"value":"${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"},"gpt4_deployment_name":{"value":"${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"},"managed_identity_client_id":{"value":"${{ steps.infra-outputs.outputs.managed_identity_client_id }}"}}'
           
           echo "✅ Review Logic App workflow deployed successfully."
 
