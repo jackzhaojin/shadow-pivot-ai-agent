@@ -122,8 +122,7 @@ resource "azurerm_resource_group_template_deployment" "entry_workflow" {
   })
 
   depends_on = [
-    azurerm_logic_app_workflow.entry,
-    azurerm_api_connection.storage_queues
+    azurerm_logic_app_workflow.entry
   ]
 }
 
@@ -176,7 +175,6 @@ resource "azurerm_resource_group_template_deployment" "design_gen_workflow" {
 
   depends_on = [
     azurerm_logic_app_workflow.design_gen,
-    azurerm_api_connection.storage_queues,
     azurerm_cognitive_account.ai_foundry,
     azurerm_cognitive_deployment.gpt4
   ]
@@ -231,7 +229,6 @@ resource "azurerm_resource_group_template_deployment" "content_gen_workflow" {
 
   depends_on = [
     azurerm_logic_app_workflow.content_gen,
-    azurerm_api_connection.storage_queues,
     azurerm_cognitive_account.ai_foundry,
     azurerm_cognitive_deployment.gpt4
   ]
@@ -287,7 +284,6 @@ resource "azurerm_resource_group_template_deployment" "review_workflow" {
 
   depends_on = [
     azurerm_logic_app_workflow.review,
-    azurerm_api_connection.storage_queues,
     azurerm_cognitive_account.ai_foundry,
     azurerm_cognitive_deployment.gpt4
   ]
