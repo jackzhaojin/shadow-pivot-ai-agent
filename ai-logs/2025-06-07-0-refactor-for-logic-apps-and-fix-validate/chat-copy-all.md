@@ -221,3 +221,111 @@ This will trigger:
 The Shadow Pivot AI Agent is now **enterprise-ready** with proper separation of concerns, improved error handling, and maintainable CI/CD pipelines. The architecture maintains all existing functionality while providing better deployment management and Azure AI Foundry integration with managed identity authentication.
 
 Would you like me to help with any specific aspect of the deployment or make any additional improvements before you deploy?
+
+jackzhaojin: I got the following error - can you fix? if it's a newer model please use a newer model from the latest docuemetnation on azure on ai foudnary
+
+
+╷
+│ Error: creating Deployment (Subscription: "***"
+│ Resource Group Name: "ShadowPivot"
+│ Account Name: "shadow-pivot-ai-foundry"
+│ Deployment Name: "gpt-4-deployment"): performing CreateOrUpdate: unexpected status 400 (400 Bad Request) with error: ServiceModelDeprecated: The model 'Format:OpenAI,Name:gpt-4,Version:0613' has been deprecated since 06/06/2025 00:00:00.
+│ 
+│   with azurerm_cognitive_deployment.gpt4,
+│   on ai_foundry.tf line 43, in resource "azurerm_cognitive_deployment" "gpt4":
+│   43: resource "azurerm_cognitive_deployment" "gpt4" {
+│ 
+│ creating Deployment (Subscription: "***"
+│ Resource Group Name: "ShadowPivot"
+│ Account Name: "shadow-pivot-ai-foundry"
+│ Deployment Name: "gpt-4-deployment"): performing CreateOrUpdate: unexpected
+│ status 400 (400 Bad Request) with error: ServiceModelDeprecated: The model
+│ 'Format:OpenAI,Name:gpt-4,Version:0613' has been deprecated since
+│ 06/06/2025 00:00:00.
+╵
+Error: Terraform exited with code 1.
+Error: Process completed with exit code 1.
+
+GitHub Copilot: I see the issue! The GPT-4 model version `0613` has been deprecated as of June 6, 2025. Let me check the current AI Foundry configuration and update it to use a newer, supported model version. Now let me check the current AI Foundry configuration to see which model version is being used: Perfect! I can see the issue. The model is using `gpt-4` version `0613` which was deprecated on June 6, 2025. According to the Azure documentation I just retrieved, the replacement model is `gpt-4o` version `2024-11-20`. Let me update the AI Foundry configuration to use the latest supported model: 
+```
+
+
+Made changes.
+
+
+```
+Now I should also check if the region `eastus` supports the `gpt-4o` model version `2024-11-20`. Let me verify that: I can see that `eastus` region supports `gpt-4o` version `2024-05-13` but I don't see the version `2024-11-20` that I specified. Let me check what versions of `gpt-4o` are actually available. Based on the available models, I should use `gpt-4o` version `2024-05-13` which is available in the `eastus` region. Let me update the configuration: 
+```
+
+
+Made changes.
+
+
+```
+Now let me also check if there's an even newer model available. I noticed in the model list that there are newer models like `gpt-4.1` version `2025-04-14` available. Let me update to use the latest `gpt-4.1` model instead: 
+```
+
+
+Made changes.
+
+
+```
+Now let me validate the Terraform configuration to make sure the changes are correct: Let me correct the path: Perfect! Now let me also check the complete updated AI Foundry configuration to make sure everything looks correct: Excellent! Now let me also check if there are any references to the old model version in the deployment workflows that might need updating. Let me check the Logic Apps workflow deployment file: Good, the workflow retrieves the deployment name dynamically, so it will automatically work with the new model. Let me also check if there are any hard-coded references in the Logic App workflow definitions. Let me check one of them: Summarized conversation historyI can see that the GPT-4 model version `0613` has been deprecated as of June 6, 2025. Let me get the latest Azure AI Foundry documentation and check what newer models are available, then update your configuration. Now let me check which models are available in your East US region: Now let me read your current AI Foundry configuration to see what needs to be updated: 
+
+Continue to iterate?
+Copilot has been working on this problem for a while. It can continue to iterate, or you can send a new message to refine your prompt.
+
+jackzhaojin: @agent Continue: "Continue to iterate?"
+
+GitHub Copilot: Perfect! I can see that you've already updated your AI Foundry configuration to use the latest `gpt-4.1` model version `2025-04-14`, which is exactly the right fix for the deprecation issue. The configuration looks correct based on the Azure documentation and available models in the East US region.
+
+Let me verify that your Terraform configuration is valid and then check if there are any other references to the old model version in your codebase: Great! Now let me search for any hard-coded references to the old model version in your Logic Apps or other files: Perfect! I can see that your project has already been successfully updated to use the latest `gpt-4.1` model version `2025-04-14`. Let me check if there are any remaining references to the old model version or any additional issues to address: Excellent! Your Azure AI Foundry configuration has been successfully updated to resolve the GPT-4 model deprecation issue. Here's a summary of what I found:
+
+## ✅ Issue Resolution Status: **COMPLETE**
+
+### **What Was Fixed:**
+Your ai_foundry.tf file has been properly updated to use:
+- **Model**: `gpt-4.1` (latest 2025 model)
+- **Version**: `2025-04-14` (latest supported version)
+- **Region**: East US (confirmed availability)
+
+### **Current Configuration:**
+```terraform
+# AI Model Deployment (GPT-4.1 - Latest 2025 model available in East US)
+resource "azurerm_cognitive_deployment" "gpt4" {
+  name                 = "gpt-4-deployment"
+  cognitive_account_id = azurerm_cognitive_account.ai_foundry.id
+
+  model {
+    format  = "OpenAI"
+    name    = "gpt-4.1"
+    version = "2025-04-14"
+  }
+
+  scale {
+    type     = "Standard"
+    capacity = 10
+  }
+}
+```
+
+### **Next Steps:**
+
+1. **Deploy the Updated Infrastructure:**
+   ```bash
+   cd /c/code/shadow-pivot-ai-agent
+   terraform -chdir=infra plan
+   terraform -chdir=infra apply
+   ```
+
+2. **Monitor the Deployment:**
+   - Watch for successful model deployment in Azure Portal
+   - Verify the new GPT-4.1 model is available in your AI Foundry instance
+
+3. **Test Your Logic Apps:**
+   - The Logic Apps will automatically use the new model endpoint
+   - Test the entry endpoint to ensure everything works correctly
+
+The deprecation error should be resolved once you deploy this updated configuration. The `gpt-4.1` version `2025-04-14` is the latest available model in the East US region and has a retirement date of April 11, 2026, giving you plenty of time before the next migration.
+
+Would you like me to help you deploy these changes or check anything else?

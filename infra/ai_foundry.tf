@@ -39,15 +39,15 @@ resource "azurerm_role_assignment" "ai_foundry_user" {
   principal_id         = azurerm_user_assigned_identity.logic_apps_identity.principal_id
 }
 
-# AI Model Deployment (GPT-4)
+# AI Model Deployment (GPT-4.1 - Latest 2025 model available in East US)
 resource "azurerm_cognitive_deployment" "gpt4" {
   name                 = "gpt-4-deployment"
   cognitive_account_id = azurerm_cognitive_account.ai_foundry.id
 
   model {
     format  = "OpenAI"
-    name    = "gpt-4"
-    version = "0613"
+    name    = "gpt-4.1"
+    version = "2025-04-14"
   }
 
   scale {
