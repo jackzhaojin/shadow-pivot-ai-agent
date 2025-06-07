@@ -59,6 +59,13 @@ fi
 print_status "Deploying Terraform infrastructure..."
 cd infra
 terraform init
+
+# Import existing workflow deployments to avoid duplication errors
+terraform import azurerm_resource_group_template_deployment.entry_workflow $RESOURCE_GROUP/entry-agent-step-workflow >/dev/null 2>&1 || print_warning "Entry workflow deployment not found - it will be created"
+terraform import azurerm_resource_group_template_deployment.design_gen_workflow $RESOURCE_GROUP/design-gen-step-workflow >/dev/null 2>&1 || print_warning "Design gen workflow deployment not found - it will be created"
+terraform import azurerm_resource_group_template_deployment.content_gen_workflow $RESOURCE_GROUP/content-gen-step-workflow >/dev/null 2>&1 || print_warning "Content gen workflow deployment not found - it will be created"
+terraform import azurerm_resource_group_template_deployment.review_workflow $RESOURCE_GROUP/review-step-workflow >/dev/null 2>&1 || print_warning "Review workflow deployment not found - it will be created"
+
 terraform plan -var="resource_group_name=$RESOURCE_GROUP"
 terraform apply -auto-approve -var="resource_group_name=$RESOURCE_GROUP"
 cd ..
