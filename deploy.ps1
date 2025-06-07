@@ -67,6 +67,13 @@ try {
 Write-Status "Deploying Terraform infrastructure..."
 Set-Location infra
 terraform init
+
+# Import existing workflow deployments to avoid duplication errors
+terraform import azurerm_resource_group_template_deployment.entry_workflow "$ResourceGroup/entry-agent-step-workflow" *> $null 2>&1; if(!$?) { Write-Warning "Entry workflow deployment not found - it will be created" }
+terraform import azurerm_resource_group_template_deployment.design_gen_workflow "$ResourceGroup/design-gen-step-workflow" *> $null 2>&1; if(!$?) { Write-Warning "Design gen workflow deployment not found - it will be created" }
+terraform import azurerm_resource_group_template_deployment.content_gen_workflow "$ResourceGroup/content-gen-step-workflow" *> $null 2>&1; if(!$?) { Write-Warning "Content gen workflow deployment not found - it will be created" }
+terraform import azurerm_resource_group_template_deployment.review_workflow "$ResourceGroup/review-step-workflow" *> $null 2>&1; if(!$?) { Write-Warning "Review workflow deployment not found - it will be created" }
+
 terraform plan -var="resource_group_name=$ResourceGroup"
 terraform apply -auto-approve -var="resource_group_name=$ResourceGroup"
 Set-Location ..
