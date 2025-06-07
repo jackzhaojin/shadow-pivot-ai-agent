@@ -204,6 +204,31 @@ To add new AI steps:
 2. Add corresponding queue and Logic App resources in Terraform files
 3. Update Terraform configuration in `infra/` folder
 
+## 🛠️ Troubleshooting
+
+If `terraform apply` fails with an error like:
+
+```
+Error: A resource with the ID "/subscriptions/.../deployments/entry-agent-step-workflow" already exists
+```
+
+the Logic App workflow deployment already exists in Azure but isn't tracked in the Terraform state. Run the deployment script, which automatically imports existing resources:
+
+```bash
+./deploy.sh
+```
+
+Or manually import the deployments before applying:
+
+```bash
+terraform -chdir=infra import azurerm_resource_group_template_deployment.entry_workflow      ShadowPivot/entry-agent-step-workflow
+terraform -chdir=infra import azurerm_resource_group_template_deployment.design_gen_workflow ShadowPivot/design-gen-step-workflow
+terraform -chdir=infra import azurerm_resource_group_template_deployment.content_gen_workflow ShadowPivot/content-gen-step-workflow
+terraform -chdir=infra import azurerm_resource_group_template_deployment.review_workflow     ShadowPivot/review-step-workflow
+```
+
+After importing, re-run `terraform -chdir=infra apply`.
+
 ## 📊 Monitoring
 
 - Monitor Logic App executions in Azure Portal
