@@ -25,11 +25,7 @@ locals {
 
   # Function to process parameters.json files and replace placeholders
   processed_parameters = {
-    entry = {
-      "$connections" = {
-        value = local.storage_connection_params
-      }
-    }
+    entry = {}
 
     design_gen = {
       "$connections" = {
