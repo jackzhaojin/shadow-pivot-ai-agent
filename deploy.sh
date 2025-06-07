@@ -72,26 +72,15 @@ sleep 30
 # Deploy Logic App Workflows (update existing Logic Apps created by Terraform)
 print_status "Deploying Logic App workflow definitions..."
 
-logic_apps=("entry" "design-gen" "content-gen" "review")
-logic_app_names=("entry-agent-step" "design-gen-step" "content-gen-step" "review-step")
-
-for i in "${!logic_apps[@]}"; do
-    app_folder="${logic_apps[$i]}"
-    app_name="${logic_app_names[$i]}"
-    
-    print_status "Deploying workflow for Logic App: $app_name"
-    
-    if [[ -f "logic-apps/$app_folder/workflow.json" ]]; then
-        # Use update instead of create since Terraform already created the Logic Apps
-        az logic workflow update \
-            --resource-group $RESOURCE_GROUP \
-            --name $app_name \
-            --definition @logic-apps/$app_folder/workflow.json
-        print_status "Logic App workflow $app_name deployed successfully."
-    else
-        print_warning "Workflow file not found for $app_folder. Skipping..."
-    fi
-done
+# Use the parameter-based deployment script
+if [[ -f "./deploy-logic-apps.sh" ]]; then
+    print_status "Using parameter-based deployment approach..."
+    ./deploy-logic-apps.sh deploy
+else
+    print_error "Parameter-based deployment script not found: ./deploy-logic-apps.sh"
+    print_error "Please ensure deploy-logic-apps.sh exists in the project root."
+    exit 1
+fi
 
 print_status "🎉 Deployment completed successfully!"
 print_status "📋 Summary:"

@@ -80,30 +80,14 @@ Start-Sleep -Seconds 30
 # Deploy Logic App Workflows (update existing Logic Apps created by Terraform)
 Write-Status "Deploying Logic App workflow definitions..."
 
-$logicApps = @(
-    @{folder="entry"; name="entry-agent-step"},
-    @{folder="design-gen"; name="design-gen-step"},
-    @{folder="content-gen"; name="content-gen-step"},
-    @{folder="review"; name="review-step"}
-)
-
-foreach ($app in $logicApps) {
-    $appFolder = $app.folder
-    $appName = $app.name
-    
-    Write-Status "Deploying workflow for Logic App: $appName"
-    
-    $workflowPath = "logic-apps\$appFolder\workflow.json"
-    if (Test-Path $workflowPath) {
-        # Use update instead of create since Terraform already created the Logic Apps
-        az logic workflow update `
-            --resource-group $ResourceGroup `
-            --name $appName `
-            --definition "@$workflowPath" | Out-Null
-        Write-Status "Logic App workflow $appName deployed successfully."
-    } else {
-        Write-Warning "Workflow file not found for $appFolder. Skipping..."
-    }
+# Use the parameter-based deployment script
+if (Test-Path ".\deploy-logic-apps.ps1") {
+    Write-Status "Using parameter-based deployment approach..."
+    & ".\deploy-logic-apps.ps1" deploy
+} else {
+    Write-Error "Parameter-based deployment script not found: .\deploy-logic-apps.ps1"
+    Write-Error "Please ensure deploy-logic-apps.ps1 exists in the project root."
+    exit 1
 }
 
 Write-Status "🎉 Deployment completed successfully!" 
@@ -111,7 +95,7 @@ Write-Status "📋 Summary:"
 Write-Status "  - Resource Group: $ResourceGroup"
 Write-Status "  - Location: $Location"
 Write-Status "  - Storage Account: shdwagentstorage"
-Write-Status "  - Logic Apps: $($logicApps.Count) deployed"
+Write-Status "  - Logic Apps: 4 deployed"
 
 Write-Status "🔗 Next steps:"
 Write-Status "  1. Configure API connections in Azure Portal"

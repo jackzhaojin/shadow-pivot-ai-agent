@@ -89,13 +89,54 @@ jobs:
             --name shadow-pivot-ai-foundry \
             --deployment-name gpt-4-deployment \
             --query "name" -o tsv)
-          
-          echo "storage_connection_id=$STORAGE_CONNECTION_ID" >> $GITHUB_OUTPUT
+            echo "storage_connection_id=$STORAGE_CONNECTION_ID" >> $GITHUB_OUTPUT
           echo "ai_foundry_endpoint=$AI_FOUNDRY_ENDPOINT" >> $GITHUB_OUTPUT
           echo "managed_identity_client_id=$MANAGED_IDENTITY_CLIENT_ID" >> $GITHUB_OUTPUT
           echo "gpt4_deployment_name=$GPT4_DEPLOYMENT_NAME" >> $GITHUB_OUTPUT
           
           echo "✅ Infrastructure outputs retrieved successfully."
+
+      - name: Prepare Parameter Files
+        run: |
+          echo "🔧 Preparing parameter files with dynamic values..."
+          
+          # Create a temporary directory for processed parameter files
+          mkdir -p temp-params
+          
+          # Function to process parameter files
+          process_parameters() {
+            local source_file="$1"
+            local target_file="$2"
+            local workflow_name="$3"
+            
+            echo "Processing parameters for $workflow_name..."
+            
+            # Copy the template and replace placeholders
+            cp "$source_file" "$target_file"
+            
+            # Replace common placeholders
+            sed -i "s|\[SUBSCRIPTION_ID\]|${{ secrets.AZURE_SUBSCRIPTION_ID }}|g" "$target_file"
+            sed -i "s|\[RESOURCE_GROUP\]|$RESOURCE_GROUP|g" "$target_file"
+            sed -i "s|\[LOCATION\]|$LOCATION|g" "$target_file"
+            sed -i "s|\[STORAGE_CONNECTION_ID\]|${{ steps.infra-outputs.outputs.storage_connection_id }}|g" "$target_file"
+            
+            # Replace AI-specific placeholders (only for AI workflows)
+            if [[ "$workflow_name" != "entry" ]]; then
+              sed -i "s|\[AI_FOUNDRY_ENDPOINT\]|${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}|g" "$target_file"
+              sed -i "s|\[GPT4_DEPLOYMENT_NAME\]|${{ steps.infra-outputs.outputs.gpt4_deployment_name }}|g" "$target_file"
+              sed -i "s|\[MANAGED_IDENTITY_CLIENT_ID\]|${{ steps.infra-outputs.outputs.managed_identity_client_id }}|g" "$target_file"
+            fi
+            
+            echo "✅ Parameters prepared for $workflow_name"
+          }
+          
+          # Process parameter files for each workflow
+          process_parameters "logic-apps/entry/parameters.json" "temp-params/entry-parameters.json" "entry"
+          process_parameters "logic-apps/design-gen/parameters.json" "temp-params/design-gen-parameters.json" "design-gen"
+          process_parameters "logic-apps/content-gen/parameters.json" "temp-params/content-gen-parameters.json" "content-gen"
+          process_parameters "logic-apps/review/parameters.json" "temp-params/review-parameters.json" "review"
+          
+          echo "🎯 All parameter files prepared successfully!"
 
       - name: Deploy Entry Logic App Workflow
         run: |
@@ -105,7 +146,7 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name entry-agent-step \
             --definition @logic-apps/entry/workflow.json \
-            --parameters '{"$connections":{"value":{"azurequeues":{"connectionId":"${{ steps.infra-outputs.outputs.storage_connection_id }}","connectionName":"azurequeues","id":"/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"}}}}'
+            --parameters @temp-params/entry-parameters.json
           
           echo "✅ Entry Logic App workflow deployed successfully."
 
@@ -117,7 +158,7 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name design-gen-step \
             --definition @logic-apps/design-gen/workflow.json \
-            --parameters '{"$connections":{"value":{"azurequeues":{"connectionId":"${{ steps.infra-outputs.outputs.storage_connection_id }}","connectionName":"azurequeues","id":"/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"}}},"ai_foundry_endpoint":{"value":"${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"},"gpt4_deployment_name":{"value":"${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"},"managed_identity_client_id":{"value":"${{ steps.infra-outputs.outputs.managed_identity_client_id }}"}}'
+            --parameters @temp-params/design-gen-parameters.json
           
           echo "✅ Design Generation Logic App workflow deployed successfully."
 
@@ -129,7 +170,7 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name content-gen-step \
             --definition @logic-apps/content-gen/workflow.json \
-            --parameters '{"$connections":{"value":{"azurequeues":{"connectionId":"${{ steps.infra-outputs.outputs.storage_connection_id }}","connectionName":"azurequeues","id":"/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"}}},"ai_foundry_endpoint":{"value":"${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"},"gpt4_deployment_name":{"value":"${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"},"managed_identity_client_id":{"value":"${{ steps.infra-outputs.outputs.managed_identity_client_id }}"}}'
+            --parameters @temp-params/content-gen-parameters.json
           
           echo "✅ Content Generation Logic App workflow deployed successfully."
 
@@ -141,7 +182,7 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name review-step \
             --definition @logic-apps/review/workflow.json \
-            --parameters '{"$connections":{"value":{"azurequeues":{"connectionId":"${{ steps.infra-outputs.outputs.storage_connection_id }}","connectionName":"azurequeues","id":"/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/providers/Microsoft.Web/locations/${{ env.LOCATION }}/managedApis/azurequeues"}}},"ai_foundry_endpoint":{"value":"${{ steps.infra-outputs.outputs.ai_foundry_endpoint }}"},"gpt4_deployment_name":{"value":"${{ steps.infra-outputs.outputs.gpt4_deployment_name }}"},"managed_identity_client_id":{"value":"${{ steps.infra-outputs.outputs.managed_identity_client_id }}"}}'
+            --parameters @temp-params/review-parameters.json
           
           echo "✅ Review Logic App workflow deployed successfully."
 

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "value": {
+        "azurequeues": {
+          "connectionId": "/subscriptions/[SUBSCRIPTION_ID]/resourceGroups/[RESOURCE_GROUP]/providers/Microsoft.Web/connections/azurequeues-connection",
+          "connectionName": "azurequeues",
+          "id": "/subscriptions/[SUBSCRIPTION_ID]/providers/Microsoft.Web/locations/[LOCATION]/managedApis/azurequeues"
+        }
+      }
+    },
+    "ai_foundry_endpoint": {
+      "value": "[AI_FOUNDRY_ENDPOINT]"
+    },
+    "gpt4_deployment_name": {
+      "value": "[GPT4_DEPLOYMENT_NAME]"
+    },
+    "managed_identity_client_id": {
+      "value": "[MANAGED_IDENTITY_CLIENT_ID]"
+    }
+  }
+}
