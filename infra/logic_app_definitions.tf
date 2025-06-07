@@ -22,11 +22,65 @@ locals {
   ai_foundry_endpoint        = azurerm_cognitive_account.ai_foundry.endpoint
   gpt4_deployment_name       = azurerm_cognitive_deployment.gpt4.name
   managed_identity_client_id = azurerm_user_assigned_identity.logic_apps_identity.client_id
+
+  # Function to process parameters.json files and replace placeholders
+  processed_parameters = {
+    entry = {
+      "$connections" = {
+        value = local.storage_connection_params
+      }
+    }
+
+    design_gen = {
+      "$connections" = {
+        value = local.storage_connection_params
+      }
+      ai_foundry_endpoint = {
+        value = local.ai_foundry_endpoint
+      }
+      gpt4_deployment_name = {
+        value = local.gpt4_deployment_name
+      }
+      managed_identity_client_id = {
+        value = local.managed_identity_client_id
+      }
+    }
+
+    content_gen = {
+      "$connections" = {
+        value = local.storage_connection_params
+      }
+      ai_foundry_endpoint = {
+        value = local.ai_foundry_endpoint
+      }
+      gpt4_deployment_name = {
+        value = local.gpt4_deployment_name
+      }
+      managed_identity_client_id = {
+        value = local.managed_identity_client_id
+      }
+    }
+
+    review = {
+      "$connections" = {
+        value = local.storage_connection_params
+      }
+      ai_foundry_endpoint = {
+        value = local.ai_foundry_endpoint
+      }
+      gpt4_deployment_name = {
+        value = local.gpt4_deployment_name
+      }
+      managed_identity_client_id = {
+        value = local.managed_identity_client_id
+      }
+    }
+  }
 }
 
 # Entry Logic App Workflow Definition Deployment
 resource "azurerm_resource_group_template_deployment" "entry_workflow" {
-  name                = "entry-workflow-deployment"
+  name                = "entry-agent-step-workflow"
   resource_group_name = data.azurerm_resource_group.main.name
   deployment_mode     = "Incremental"
 
@@ -34,43 +88,37 @@ resource "azurerm_resource_group_template_deployment" "entry_workflow" {
     "$schema"      = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
     contentVersion = "1.0.0.0"
     parameters = {
-      logicAppName = {
+      workflowName = {
         type         = "string"
         defaultValue = "entry-agent-step"
-      }
-      storageConnectionId = {
-        type = "string"
       }
       location = {
         type         = "string"
         defaultValue = local.location
       }
     }
-    resources = [
-      {
-        type       = "Microsoft.Logic/workflows"
-        apiVersion = "2017-07-01"
-        name       = "[parameters('logicAppName')]"
-        location   = "[parameters('location')]"
-        properties = {
-          definition = jsondecode(file("${path.module}/../logic-apps/entry/workflow.json"))
-          parameters = {
-            "$connections" = {
-              defaultValue = {}
-              type         = "Object"
-            }
-          }
-        }
+    resources = [{
+      type       = "Microsoft.Logic/workflows"
+      apiVersion = "2017-07-01"
+      name       = "[parameters('workflowName')]"
+      location   = "[parameters('location')]"
+      properties = {
+        definition = jsondecode(file("${path.module}/../logic-apps/entry/workflow.json"))
+        parameters = local.processed_parameters.entry
+      }
       }
     ]
+    outputs = {
+      triggerUrl = {
+        type  = "string"
+        value = "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', parameters('workflowName')), '/triggers/manual'), '2017-07-01').value]"
+      }
+    }
   })
 
   parameters_content = jsonencode({
-    logicAppName = {
+    workflowName = {
       value = "entry-agent-step"
-    }
-    storageConnectionId = {
-      value = local.storage_connection_id
     }
     location = {
       value = local.location
@@ -85,7 +133,7 @@ resource "azurerm_resource_group_template_deployment" "entry_workflow" {
 
 # Design Generation Logic App Workflow Definition Deployment
 resource "azurerm_resource_group_template_deployment" "design_gen_workflow" {
-  name                = "design-gen-workflow-deployment"
+  name                = "design-gen-step-workflow"
   resource_group_name = data.azurerm_resource_group.main.name
   deployment_mode     = "Incremental"
 
@@ -93,61 +141,37 @@ resource "azurerm_resource_group_template_deployment" "design_gen_workflow" {
     "$schema"      = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
     contentVersion = "1.0.0.0"
     parameters = {
-      logicAppName = {
+      workflowName = {
         type         = "string"
         defaultValue = "design-gen-step"
-      }
-      storageConnectionId = {
-        type = "string"
-      }
-      aiFoundryEndpoint = {
-        type = "string"
-      }
-      gpt4DeploymentName = {
-        type = "string"
-      }
-      managedIdentityClientId = {
-        type = "string"
       }
       location = {
         type         = "string"
         defaultValue = local.location
       }
     }
-    resources = [
-      {
-        type       = "Microsoft.Logic/workflows"
-        apiVersion = "2017-07-01"
-        name       = "[parameters('logicAppName')]"
-        location   = "[parameters('location')]"
-        properties = {
-          definition = jsondecode(file("${path.module}/../logic-apps/design-gen/workflow.json"))
-          parameters = {
-            "$connections" = {
-              defaultValue = {}
-              type         = "Object"
-            }
-          }
-        }
+    resources = [{
+      type       = "Microsoft.Logic/workflows"
+      apiVersion = "2017-07-01"
+      name       = "[parameters('workflowName')]"
+      location   = "[parameters('location')]"
+      properties = {
+        definition = jsondecode(file("${path.module}/../logic-apps/design-gen/workflow.json"))
+        parameters = local.processed_parameters.design_gen
+      }
       }
     ]
+    outputs = {
+      triggerUrl = {
+        type  = "string"
+        value = "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', parameters('workflowName')), '/triggers/manual'), '2017-07-01').value]"
+      }
+    }
   })
 
   parameters_content = jsonencode({
-    logicAppName = {
+    workflowName = {
       value = "design-gen-step"
-    }
-    storageConnectionId = {
-      value = local.storage_connection_id
-    }
-    aiFoundryEndpoint = {
-      value = local.ai_foundry_endpoint
-    }
-    gpt4DeploymentName = {
-      value = local.gpt4_deployment_name
-    }
-    managedIdentityClientId = {
-      value = local.managed_identity_client_id
     }
     location = {
       value = local.location
@@ -164,7 +188,7 @@ resource "azurerm_resource_group_template_deployment" "design_gen_workflow" {
 
 # Content Generation Logic App Workflow Definition Deployment
 resource "azurerm_resource_group_template_deployment" "content_gen_workflow" {
-  name                = "content-gen-workflow-deployment"
+  name                = "content-gen-step-workflow"
   resource_group_name = data.azurerm_resource_group.main.name
   deployment_mode     = "Incremental"
 
@@ -172,61 +196,37 @@ resource "azurerm_resource_group_template_deployment" "content_gen_workflow" {
     "$schema"      = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
     contentVersion = "1.0.0.0"
     parameters = {
-      logicAppName = {
+      workflowName = {
         type         = "string"
         defaultValue = "content-gen-step"
-      }
-      storageConnectionId = {
-        type = "string"
-      }
-      aiFoundryEndpoint = {
-        type = "string"
-      }
-      gpt4DeploymentName = {
-        type = "string"
-      }
-      managedIdentityClientId = {
-        type = "string"
       }
       location = {
         type         = "string"
         defaultValue = local.location
       }
     }
-    resources = [
-      {
-        type       = "Microsoft.Logic/workflows"
-        apiVersion = "2017-07-01"
-        name       = "[parameters('logicAppName')]"
-        location   = "[parameters('location')]"
-        properties = {
-          definition = jsondecode(file("${path.module}/../logic-apps/content-gen/workflow.json"))
-          parameters = {
-            "$connections" = {
-              defaultValue = {}
-              type         = "Object"
-            }
-          }
-        }
+    resources = [{
+      type       = "Microsoft.Logic/workflows"
+      apiVersion = "2017-07-01"
+      name       = "[parameters('workflowName')]"
+      location   = "[parameters('location')]"
+      properties = {
+        definition = jsondecode(file("${path.module}/../logic-apps/content-gen/workflow.json"))
+        parameters = local.processed_parameters.content_gen
+      }
       }
     ]
+    outputs = {
+      triggerUrl = {
+        type  = "string"
+        value = "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', parameters('workflowName')), '/triggers/manual'), '2017-07-01').value]"
+      }
+    }
   })
 
   parameters_content = jsonencode({
-    logicAppName = {
+    workflowName = {
       value = "content-gen-step"
-    }
-    storageConnectionId = {
-      value = local.storage_connection_id
-    }
-    aiFoundryEndpoint = {
-      value = local.ai_foundry_endpoint
-    }
-    gpt4DeploymentName = {
-      value = local.gpt4_deployment_name
-    }
-    managedIdentityClientId = {
-      value = local.managed_identity_client_id
     }
     location = {
       value = local.location
@@ -243,7 +243,7 @@ resource "azurerm_resource_group_template_deployment" "content_gen_workflow" {
 
 # Review Logic App Workflow Definition Deployment
 resource "azurerm_resource_group_template_deployment" "review_workflow" {
-  name                = "review-workflow-deployment"
+  name                = "review-step-workflow"
   resource_group_name = data.azurerm_resource_group.main.name
   deployment_mode     = "Incremental"
 
@@ -251,21 +251,9 @@ resource "azurerm_resource_group_template_deployment" "review_workflow" {
     "$schema"      = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
     contentVersion = "1.0.0.0"
     parameters = {
-      logicAppName = {
+      workflowName = {
         type         = "string"
         defaultValue = "review-step"
-      }
-      storageConnectionId = {
-        type = "string"
-      }
-      aiFoundryEndpoint = {
-        type = "string"
-      }
-      gpt4DeploymentName = {
-        type = "string"
-      }
-      managedIdentityClientId = {
-        type = "string"
       }
       location = {
         type         = "string"
@@ -276,36 +264,25 @@ resource "azurerm_resource_group_template_deployment" "review_workflow" {
       {
         type       = "Microsoft.Logic/workflows"
         apiVersion = "2017-07-01"
-        name       = "[parameters('logicAppName')]"
+        name       = "[parameters('workflowName')]"
         location   = "[parameters('location')]"
         properties = {
           definition = jsondecode(file("${path.module}/../logic-apps/review/workflow.json"))
-          parameters = {
-            "$connections" = {
-              defaultValue = {}
-              type         = "Object"
-            }
-          }
+          parameters = local.processed_parameters.review
         }
       }
     ]
+    outputs = {
+      triggerUrl = {
+        type  = "string"
+        value = "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', parameters('workflowName')), '/triggers/manual'), '2017-07-01').value]"
+      }
+    }
   })
 
   parameters_content = jsonencode({
-    logicAppName = {
+    workflowName = {
       value = "review-step"
-    }
-    storageConnectionId = {
-      value = local.storage_connection_id
-    }
-    aiFoundryEndpoint = {
-      value = local.ai_foundry_endpoint
-    }
-    gpt4DeploymentName = {
-      value = local.gpt4_deployment_name
-    }
-    managedIdentityClientId = {
-      value = local.managed_identity_client_id
     }
     location = {
       value = local.location

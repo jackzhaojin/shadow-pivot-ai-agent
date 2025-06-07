@@ -107,9 +107,27 @@ output "review_workflow_deployment_id" {
   value       = azurerm_resource_group_template_deployment.review_workflow.id
 }
 
-# Logic App Trigger URLs
+# Logic App Trigger URLs (from ARM template deployments)
 output "entry_logic_app_trigger_url" {
   description = "The trigger URL for the entry logic app"
-  value       = "https://management.azure.com/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${data.azurerm_resource_group.main.name}/providers/Microsoft.Logic/workflows/entry-agent-step/triggers/manual/listCallbackUrl?api-version=2016-06-01"
+  value       = jsondecode(azurerm_resource_group_template_deployment.entry_workflow.output_content).triggerUrl.value
+  sensitive   = true
+}
+
+output "design_gen_logic_app_trigger_url" {
+  description = "The trigger URL for the design generation logic app"
+  value       = jsondecode(azurerm_resource_group_template_deployment.design_gen_workflow.output_content).triggerUrl.value
+  sensitive   = true
+}
+
+output "content_gen_logic_app_trigger_url" {
+  description = "The trigger URL for the content generation logic app"
+  value       = jsondecode(azurerm_resource_group_template_deployment.content_gen_workflow.output_content).triggerUrl.value
+  sensitive   = true
+}
+
+output "review_logic_app_trigger_url" {
+  description = "The trigger URL for the review logic app"
+  value       = jsondecode(azurerm_resource_group_template_deployment.review_workflow.output_content).triggerUrl.value
   sensitive   = true
 }
