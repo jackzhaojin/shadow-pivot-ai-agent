@@ -145,6 +145,39 @@ print_status "  - Content creation: ✅"
 print_status "  - Error handling: ✅"
 print_status "  - Concurrent requests: ✅"
 
+# Workflow Testing Section
+print_status ""
+print_status "🔄 GitHub Actions Workflow Testing:"
+print_status "  For testing the deployment workflow locally, use:"
+print_status "  1. Validate workflow: ./validate-workflow.sh"
+print_status "  2. Run locally with act: ./test-local-workflow.sh"
+print_status "  3. Test individual commands:"
+
+# Test Azure CLI commands individually
+print_test "Testing Azure CLI accessibility..."
+if az account show &> /dev/null; then
+    print_status "  ✅ Azure CLI authenticated"
+    
+    # Test resource group access
+    if az group show --name "ShadowPivot" &> /dev/null; then
+        print_status "  ✅ Can access resource group"
+    else
+        print_warning "  ⚠️ Cannot access ShadowPivot resource group"
+    fi
+    
+    # Test Logic App access
+    logic_apps=("entry-agent-step" "design-gen-step" "content-gen-step" "review-step")
+    for app in "${logic_apps[@]}"; do
+        if az logic workflow show --resource-group "ShadowPivot" --name "$app" &> /dev/null; then
+            print_status "  ✅ Can access Logic App: $app"
+        else
+            print_warning "  ⚠️ Cannot access Logic App: $app"
+        fi
+    done
+else
+    print_warning "  ⚠️ Azure CLI not authenticated. Run 'az login' first."
+fi
+
 print_status "🔍 Next steps:"
 print_status "  1. Check Azure Portal for Logic App execution history"
 print_status "  2. Monitor storage queues for message processing"

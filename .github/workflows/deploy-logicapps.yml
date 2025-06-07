@@ -83,11 +83,10 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --name shadow-pivot-logic-apps-identity \
             --query "clientId" -o tsv)
-          
-          # Get GPT-4 deployment name
+            # Get GPT-4 deployment name
           GPT4_DEPLOYMENT_NAME=$(az cognitiveservices account deployment show \
             --resource-group $RESOURCE_GROUP \
-            --account-name shadow-pivot-ai-foundry \
+            --name shadow-pivot-ai-foundry \
             --deployment-name gpt-4-deployment \
             --query "name" -o tsv)
           
