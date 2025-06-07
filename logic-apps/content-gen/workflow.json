@@ -1,7 +1,20 @@
 {
   "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {},
+  "parameters": {
+    "$connections": {
+      "type": "Object"
+    },
+    "ai_foundry_endpoint": {
+      "type": "String"
+    },
+    "gpt4_deployment_name": {
+      "type": "String"
+    },
+    "managed_identity_client_id": {
+      "type": "String"
+    }
+  },
   "triggers": {
     "When_a_new_message_is_received_in_a_queue": {
       "type": "ApiConnection",
