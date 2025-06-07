@@ -22,10 +22,11 @@ terraform {
 provider "azurerm" {
   features {}
 
-  # Use OIDC authentication in CI/CD
-  use_cli  = false
+  # Hybrid authentication: CLI for local development, OIDC for CI/CD
+  # Environment variables in CI/CD will automatically enable OIDC authentication
+  use_cli  = var.use_cli_auth
   use_msi  = false
-  use_oidc = true
+  use_oidc = var.use_oidc_auth
 
   # Enable automatic resource provider registration
   # This requires subscription-level permissions for the service principal

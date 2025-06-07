@@ -1,0 +1,9 @@
+# CI/CD configuration
+# This file configures Terraform for GitHub Actions deployment using OIDC authentication
+
+resource_group_name = "ShadowPivot"
+ai_foundry_location = "East US"
+
+# Use OIDC authentication for CI/CD
+use_cli_auth  = false
+use_oidc_auth = true

@@ -51,7 +51,7 @@ resource "azurerm_cognitive_deployment" "gpt4" {
   }
 
   scale {
-    type     = "Standard"
+    type     = "GlobalStandard"
     capacity = 10
   }
 }

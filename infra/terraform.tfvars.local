@@ -1,0 +1,10 @@
+# Local development configuration
+# This file configures Terraform for local development using Azure CLI authentication
+# Safe to commit - contains no sensitive information, only configuration settings
+
+resource_group_name = "ShadowPivot"
+ai_foundry_location = "East US"
+
+# Use CLI authentication for local development
+use_cli_auth  = true
+use_oidc_auth = false

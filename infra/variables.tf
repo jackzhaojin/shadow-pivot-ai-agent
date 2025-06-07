@@ -8,3 +8,16 @@ variable "ai_foundry_location" {
   type        = string
   default     = "East US"
 }
+
+# Authentication method variables for hybrid deployment
+variable "use_cli_auth" {
+  description = "Use Azure CLI authentication (for local development)"
+  type        = bool
+  default     = true
+}
+
+variable "use_oidc_auth" {
+  description = "Use OIDC authentication (for CI/CD)"
+  type        = bool
+  default     = false
+}
