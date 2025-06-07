@@ -55,7 +55,15 @@
    - `AZURE_CLIENT_ID`
    - `AZURE_SUBSCRIPTION_ID` 
    - `AZURE_TENANT_ID`
-3. Push to main branch - automatic deployment starts
+3. Push to main branch - triggers the following deployment sequence:
+   - **Step 1**: Bootstrap (creates Terraform state storage)
+   - **Step 2**: Deploy Infrastructure (Terraform provisions all Azure resources)
+   - **Step 3**: Deploy Logic App Workflows (automatically triggered after infrastructure)
+
+### Deployment Sequence Details
+- **Bootstrap**: Creates Terraform state storage account and container
+- **Infrastructure**: Deploys storage, AI Foundry, managed identity, empty Logic Apps
+- **Workflows**: Deploys workflow definitions with proper connection parameters
 
 ### Option 2: Manual Deployment
 ```bash
@@ -65,6 +73,8 @@
 # Windows PowerShell
 .\deploy.ps1
 ```
+
+**Note**: Manual deployment handles both infrastructure and workflows in sequence.
 
 ## 🧪 Testing the System
 

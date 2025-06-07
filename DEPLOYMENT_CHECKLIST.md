@@ -27,10 +27,28 @@
 # 1. Push to GitHub main branch
 git push origin main
 
-# 2. Monitor GitHub Actions
+# 2. Monitor GitHub Actions workflows in sequence:
+#    Step 1: Deploy Infrastructure (includes bootstrap)
+#    Step 2: Deploy Logic App Workflows (auto-triggered)
+
+# 3. Check workflow completion
 # - Go to GitHub repository > Actions tab
-# - Watch both workflows complete successfully
+# - Verify "Deploy Infrastructure" completed successfully
+# - Verify "Deploy Logic App Workflows" completed successfully
 ```
+
+### Deployment Sequence Details
+The automated deployment follows this sequence:
+1. **Bootstrap**: Creates Terraform state storage (if needed)
+2. **Infrastructure Deployment**: 
+   - Provisions all Azure resources via Terraform
+   - Creates empty Logic Apps with proper identity assignments
+   - Sets up storage, AI Foundry, and API connections
+3. **Workflow Deployment**:
+   - Automatically triggered after infrastructure deployment
+   - Deploys workflow definitions to Logic Apps
+   - Configures proper connection parameters
+   - Tests entry endpoint functionality
 
 ### Option 2: Manual Deployment
 ```bash

@@ -61,29 +61,72 @@ shadow-pivot-ai-agent/
 
 ### Deployment Process
 
-1. **Infrastructure Deployment**: Push to `main` branch triggers Terraform to provision:
-   - Storage Account and Queues
-   - Azure AI Foundry (OpenAI Service)
-   - User-Assigned Managed Identity
-   - Logic Apps with proper RBAC assignments
+The deployment follows a sequential approach with two separate workflows:
 
-2. **Automatic Workflow Deployment**: Terraform deploys all Logic App workflow definitions
+1. **Infrastructure Deployment**: Push to `main` branch triggers:
+   - **Bootstrap**: Creates Terraform state storage
+   - **Terraform Apply**: Provisions core infrastructure:
+     - Storage Account and Queues
+     - Azure AI Foundry (OpenAI Service)
+     - User-Assigned Managed Identity
+     - Empty Logic Apps with proper RBAC assignments
+     - API connections and role assignments
+
+2. **Logic App Workflow Deployment**: Automatically triggered after infrastructure deployment:
+   - Verifies infrastructure components exist
+   - Retrieves necessary connection parameters
+   - Deploys workflow definitions to Logic Apps:
+     - Entry Agent Step
+     - Design Generation Step  
+     - Content Generation Step
+     - Review Step
+   - Tests entry endpoint functionality
 
 ### Manual Deployment
 
 ```bash
-# Deploy infrastructure
+# 1. Deploy infrastructure only
 cd infra
 terraform init
 terraform apply
 
-# Deploy Logic Apps
-az logic workflow create \
+# 2. Deploy Logic App workflows (after infrastructure is ready)
+cd ..
+
+# Deploy Entry Logic App workflow
+az logic workflow update \
   --resource-group ShadowPivot \
   --name entry-agent-step \
-  --definition @logic-apps/entry/workflow.json \
-  --location eastus
+  --definition @logic-apps/entry/workflow.json
+
+# Deploy other Logic App workflows  
+az logic workflow update \
+  --resource-group ShadowPivot \
+  --name design-gen-step \
+  --definition @logic-apps/design-gen/workflow.json
+
+az logic workflow update \
+  --resource-group ShadowPivot \
+  --name content-gen-step \
+  --definition @logic-apps/content-gen/workflow.json
+
+az logic workflow update \
+  --resource-group ShadowPivot \
+  --name review-step \
+  --definition @logic-apps/review/workflow.json
 ```
+
+### Workflow Dependencies
+
+The deployment sequence is critical:
+- **Step 1**: Infrastructure must be fully deployed first
+- **Step 2**: Logic Apps (empty) are created by Terraform
+- **Step 3**: Workflow definitions are deployed separately with proper connection parameters
+
+This separation allows for:
+- Independent workflow updates without infrastructure changes
+- Better error isolation and debugging
+- Cleaner CI/CD pipeline management
 
 ## 🔧 Configuration
 

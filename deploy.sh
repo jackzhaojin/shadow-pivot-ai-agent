@@ -63,8 +63,14 @@ terraform plan -var="resource_group_name=$RESOURCE_GROUP"
 terraform apply -auto-approve -var="resource_group_name=$RESOURCE_GROUP"
 cd ..
 
-# Deploy Logic Apps
-print_status "Deploying Logic Apps..."
+print_status "Infrastructure deployment completed. Logic Apps are created but need workflow definitions."
+
+# Wait a moment for resources to be fully available
+print_status "Waiting 30 seconds for resources to be fully available..."
+sleep 30
+
+# Deploy Logic App Workflows (update existing Logic Apps created by Terraform)
+print_status "Deploying Logic App workflow definitions..."
 
 logic_apps=("entry" "design-gen" "content-gen" "review")
 logic_app_names=("entry-agent-step" "design-gen-step" "content-gen-step" "review-step")
@@ -73,16 +79,15 @@ for i in "${!logic_apps[@]}"; do
     app_folder="${logic_apps[$i]}"
     app_name="${logic_app_names[$i]}"
     
-    print_status "Deploying Logic App: $app_name"
+    print_status "Deploying workflow for Logic App: $app_name"
     
     if [[ -f "logic-apps/$app_folder/workflow.json" ]]; then
-        az logic workflow create \
+        # Use update instead of create since Terraform already created the Logic Apps
+        az logic workflow update \
             --resource-group $RESOURCE_GROUP \
             --name $app_name \
-            --definition @logic-apps/$app_folder/workflow.json \
-            --location $LOCATION \
-            --force-create
-        print_status "Logic App $app_name deployed successfully."
+            --definition @logic-apps/$app_folder/workflow.json
+        print_status "Logic App workflow $app_name deployed successfully."
     else
         print_warning "Workflow file not found for $app_folder. Skipping..."
     fi

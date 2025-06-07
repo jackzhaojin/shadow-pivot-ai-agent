@@ -85,3 +85,25 @@ jobs:
 
       - name: Terraform Apply
         run: terraform -chdir=infra apply -auto-approve
+
+      - name: Infrastructure Deployment Summary
+        run: |
+          echo "🎉 Infrastructure deployment completed successfully!"
+          echo ""
+          echo "📋 Infrastructure Summary:"
+          echo "  ✅ Azure AI Foundry: shadow-pivot-ai-foundry"
+          echo "  ✅ User-Assigned Managed Identity: shadow-pivot-logic-apps-identity"
+          echo "  ✅ Storage Account: shdwagentstorage"
+          echo "  ✅ Storage Queues: design-gen-q, content-gen-q, review-q, completion-q"
+          echo "  ✅ Storage Container: ai-artifacts"
+          echo "  ✅ API Connection: azurequeues-connection"
+          echo "  ✅ Logic Apps (empty): entry-agent-step, design-gen-step, content-gen-step, review-step"
+          echo "  ✅ GPT-4 Deployment: gpt-4-deployment"
+          echo ""
+          echo "🔗 Next Steps:"
+          echo "  1. Logic App workflows will be deployed automatically via 'Deploy Logic App Workflows' workflow"
+          echo "  2. Monitor the workflow deployment in the Actions tab"
+          echo "  3. Test the complete AI pipeline once workflows are deployed"
+          echo ""
+          echo "📍 Resource Group: ShadowPivot"
+          echo "📍 Location: eastus"
