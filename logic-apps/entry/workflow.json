@@ -28,6 +28,32 @@
     }
   },
   "actions": {
+    "Compose_task_info": {
+      "type": "Compose",
+      "inputs": {
+        "taskId": "@{guid()}",
+        "timestamp": "@{utcNow()}"
+      },
+      "runAfter": {}
+    },
+    "Queue_for_design_generation": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['azurequeues']['connectionId']"
+          }
+        },
+        "method": "post",
+        "path": "/queues/@{encodeURIComponent('design-gen-q')}/messages",
+        "body": {
+          "MessageText": "@{json(string(union(triggerBody(), json(concat('{\"taskId\":\"', outputs('Compose_task_info')?['taskId'], '\",\"timestamp\":\"', outputs('Compose_task_info')?['timestamp'], '\",\"stage\":\"design-generation\"}')))))}"
+        }
+      },
+      "runAfter": {
+        "Compose_task_info": ["Succeeded"]
+      }
+    },
     "Response": {
       "type": "Response",
       "kind": "Http",
@@ -36,14 +62,16 @@
         "body": {
           "status": "accepted",
           "message": "AI agent task queued for processing",
-          "taskId": "@{guid()}",
+          "taskId": "@{outputs('Compose_task_info')?['taskId']}",
           "userId": "@{triggerBody()['userId']}",
           "sessionId": "@{coalesce(triggerBody()['sessionId'], guid())}",
-          "timestamp": "@{utcNow()}",
+          "timestamp": "@{outputs('Compose_task_info')?['timestamp']}",
           "estimatedProcessingTime": "2-5 minutes"
         }
       },
-      "runAfter": {}
+      "runAfter": {
+        "Queue_for_design_generation": ["Succeeded"]
+      }
     }
   },
   "outputs": {}
