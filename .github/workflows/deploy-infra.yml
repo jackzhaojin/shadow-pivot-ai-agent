@@ -41,6 +41,19 @@ jobs:
       - name: Terraform Init
         run: terraform -chdir=infra init -var-file="terraform.tfvars.cicd"
 
+      - name: Clean up existing ARM deployments (if any)
+        run: |
+          echo "🧹 Cleaning up existing ARM template deployments to avoid conflicts..."
+          
+          # Delete existing ARM deployments that might conflict with Terraform
+          az deployment group delete --name "entry-agent-step-workflow" --resource-group "ShadowPivot" --no-wait || echo "Entry workflow deployment doesn't exist or already deleted"
+          az deployment group delete --name "design-gen-step-workflow" --resource-group "ShadowPivot" --no-wait || echo "Design gen workflow deployment doesn't exist or already deleted"
+          az deployment group delete --name "content-gen-step-workflow" --resource-group "ShadowPivot" --no-wait || echo "Content gen workflow deployment doesn't exist or already deleted"
+          az deployment group delete --name "review-step-workflow" --resource-group "ShadowPivot" --no-wait || echo "Review workflow deployment doesn't exist or already deleted"
+          
+          echo "⏳ Waiting for ARM deployment deletions to complete..."
+          sleep 30
+
       - name: Import Existing Resources if they exist
         run: |
           # Import User-Assigned Managed Identity
@@ -49,7 +62,6 @@ jobs:
           # Import AI Foundry (Cognitive Account)
           terraform -chdir=infra import azurerm_cognitive_account.ai_foundry /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/ShadowPivot/providers/Microsoft.CognitiveServices/accounts/shadow-pivot-ai-foundry || echo "AI Foundry doesn't exist yet, will be created"
           
-                    
           # Import Storage Account
           terraform -chdir=infra import azurerm_storage_account.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/ShadowPivot/providers/Microsoft.Storage/storageAccounts/shdwagentstorage || echo "Storage account doesn't exist yet, will be created"
           
@@ -59,11 +71,7 @@ jobs:
           terraform -chdir=infra import azurerm_logic_app_workflow.content_gen /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/ShadowPivot/providers/Microsoft.Logic/workflows/content-gen-step || echo "Content Gen Logic App doesn't exist yet, will be created"
           terraform -chdir=infra import azurerm_logic_app_workflow.review /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/ShadowPivot/providers/Microsoft.Logic/workflows/review-step || echo "Review Logic App doesn't exist yet, will be created"
           
-          # Import ARM Template Deployments for Logic App Workflows
-          terraform -chdir=infra import azurerm_resource_group_template_deployment.entry_workflow ShadowPivot/entry-agent-step-workflow || echo "Entry workflow ARM template doesn't exist yet, will be created"
-          terraform -chdir=infra import azurerm_resource_group_template_deployment.design_gen_workflow ShadowPivot/design-gen-step-workflow || echo "Design gen workflow ARM template doesn't exist yet, will be created"
-          terraform -chdir=infra import azurerm_resource_group_template_deployment.content_gen_workflow ShadowPivot/content-gen-step-workflow || echo "Content gen workflow ARM template doesn't exist yet, will be created"
-          terraform -chdir=infra import azurerm_resource_group_template_deployment.review_workflow ShadowPivot/review-step-workflow || echo "Review workflow ARM template doesn't exist yet, will be created"
+          # NOTE: ARM Template Deployments are now handled by deleting existing ones before Terraform creates new ones
           
           # Import Storage Queues
           terraform -chdir=infra import azurerm_storage_queue.design_gen_q https://shdwagentstorage.queue.core.windows.net/design-gen-q || echo "Design gen queue doesn't exist yet, will be created"
