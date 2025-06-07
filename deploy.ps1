@@ -71,34 +71,15 @@ terraform plan -var="resource_group_name=$ResourceGroup"
 terraform apply -auto-approve -var="resource_group_name=$ResourceGroup"
 Set-Location ..
 
-Write-Status "Infrastructure deployment completed. Logic Apps are created but need workflow definitions."
-
-# Wait a moment for resources to be fully available
-Write-Status "Waiting 30 seconds for resources to be fully available..."
-Start-Sleep -Seconds 30
-
-# Deploy Logic App Workflows (update existing Logic Apps created by Terraform)
-Write-Status "Deploying Logic App workflow definitions..."
-
-# Use the parameter-based deployment script
-if (Test-Path ".\deploy-logic-apps.ps1") {
-    Write-Status "Using parameter-based deployment approach..."
-    & ".\deploy-logic-apps.ps1" deploy
-} else {
-    Write-Error "Parameter-based deployment script not found: .\deploy-logic-apps.ps1"
-    Write-Error "Please ensure deploy-logic-apps.ps1 exists in the project root."
-    exit 1
-}
-
 Write-Status "🎉 Deployment completed successfully!" 
 Write-Status "📋 Summary:"
 Write-Status "  - Resource Group: $ResourceGroup"
 Write-Status "  - Location: $Location"
 Write-Status "  - Storage Account: shdwagentstorage"
-Write-Status "  - Logic Apps: 4 deployed"
+Write-Status "  - Logic Apps: All workflows deployed with definitions"
 
 Write-Status "🔗 Next steps:"
-Write-Status "  1. Configure API connections in Azure Portal"
-Write-Status "  2. Set up OpenAI API key in Key Vault"
-Write-Status "  3. Test the entry Logic App endpoint"
+Write-Status "  1. Test the entry Logic App endpoint"
+Write-Status "  2. Monitor executions in Azure Portal"
+Write-Status "  3. Check AI Foundry usage in Azure AI Studio"
 Write-Status "  4. Monitor queue processing"

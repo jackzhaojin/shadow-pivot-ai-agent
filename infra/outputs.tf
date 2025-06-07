@@ -85,3 +85,31 @@ output "gpt4_deployment_name" {
   description = "The name of the GPT-4 deployment in AI Foundry"
   value       = azurerm_cognitive_deployment.gpt4.name
 }
+
+# Logic App Workflow Deployment Outputs
+output "entry_workflow_deployment_id" {
+  description = "The ID of the entry workflow ARM template deployment"
+  value       = azurerm_resource_group_template_deployment.entry_workflow.id
+}
+
+output "design_gen_workflow_deployment_id" {
+  description = "The ID of the design generation workflow ARM template deployment"
+  value       = azurerm_resource_group_template_deployment.design_gen_workflow.id
+}
+
+output "content_gen_workflow_deployment_id" {
+  description = "The ID of the content generation workflow ARM template deployment"
+  value       = azurerm_resource_group_template_deployment.content_gen_workflow.id
+}
+
+output "review_workflow_deployment_id" {
+  description = "The ID of the review workflow ARM template deployment"
+  value       = azurerm_resource_group_template_deployment.review_workflow.id
+}
+
+# Logic App Trigger URLs
+output "entry_logic_app_trigger_url" {
+  description = "The trigger URL for the entry logic app"
+  value       = "https://management.azure.com/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${data.azurerm_resource_group.main.name}/providers/Microsoft.Logic/workflows/entry-agent-step/triggers/manual/listCallbackUrl?api-version=2016-06-01"
+  sensitive   = true
+}

@@ -19,7 +19,7 @@ print_status "🧪 Running quick workflow validation tests..."
 
 # Test 1: Validate workflow syntax with act
 print_status "Test 1: Validating workflow syntax..."
-if act --list -W .github/workflows/deploy-logicapps.yml > /dev/null 2>&1; then
+if act --list -W .github/workflows/deploy-infra.yml > /dev/null 2>&1; then
     print_status "✅ Workflow syntax is valid"
 else
     print_error "❌ Workflow syntax validation failed"
@@ -28,7 +28,7 @@ fi
 
 # Test 2: Dry run validation
 print_status "Test 2: Running dry-run validation..."
-if act workflow_dispatch --dryrun -W .github/workflows/deploy-logicapps.yml --secret-file .act-secrets > /dev/null 2>&1; then
+if act workflow_dispatch --dryrun -W .github/workflows/deploy-infra.yml --secret-file .act-secrets > /dev/null 2>&1; then
     print_status "✅ Dry run passed - all steps are valid"
 else
     print_error "❌ Dry run failed"
@@ -38,7 +38,7 @@ fi
 # Test 3: Check required files exist
 print_status "Test 3: Checking required files..."
 required_files=(
-    ".github/workflows/deploy-logicapps.yml"
+    ".github/workflows/deploy-infra.yml"
     "logic-apps/entry/workflow.json"
     "logic-apps/design-gen/workflow.json"
     "logic-apps/content-gen/workflow.json"
@@ -76,7 +76,7 @@ fi
 
 # Test 5: Check for environment variables and secrets
 print_status "Test 5: Checking workflow configuration..."
-workflow_file=".github/workflows/deploy-logicapps.yml"
+workflow_file=".github/workflows/deploy-infra.yml"
 
 # Check for required secrets
 required_secrets=("AZURE_CLIENT_ID" "AZURE_SUBSCRIPTION_ID" "AZURE_TENANT_ID")
@@ -102,7 +102,7 @@ print_status "🚀 To run the full workflow locally:"
 print_status "   ./test-local-workflow.sh"
 print_status ""
 print_status "🧪 To test individual commands:"
-print_status "   act workflow_dispatch -W .github/workflows/deploy-logicapps.yml --secret-file .act-secrets"
+print_status "   act workflow_dispatch -W .github/workflows/deploy-infra.yml --secret-file .act-secrets"
 print_status ""
 print_status "📋 Next steps:"
 print_status "   1. Update .act-secrets with real Azure credentials"

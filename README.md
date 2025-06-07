@@ -38,8 +38,7 @@ shadow-pivot-ai-agent/
 │       └── workflow.json
 ├── .github/
 │   └── workflows/           # GitHub Actions
-│       ├── deploy-infra.yml # Infrastructure deployment
-│       └── deploy-logicapps.yml # Logic App deployment
+│       └── deploy-infra.yml # Complete infrastructure & Logic Apps deployment
 ├── deploy.sh               # Manual deployment script
 ├── test.sh                 # API testing script
 ├── API_DOCS.md            # API documentation
@@ -202,8 +201,8 @@ curl -X POST "https://your-logic-app-url" \
 To add new AI steps:
 
 1. Create new Logic App workflow in `logic-apps/<step-name>/workflow.json`
-2. Add corresponding queue in `infra/main.tf`
-3. Update deployment workflow in `.github/workflows/deploy-logicapps.yml`
+2. Add corresponding queue and Logic App resources in Terraform files
+3. Update Terraform configuration in `infra/` folder
 
 ## 📊 Monitoring
 

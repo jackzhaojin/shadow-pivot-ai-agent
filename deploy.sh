@@ -63,34 +63,15 @@ terraform plan -var="resource_group_name=$RESOURCE_GROUP"
 terraform apply -auto-approve -var="resource_group_name=$RESOURCE_GROUP"
 cd ..
 
-print_status "Infrastructure deployment completed. Logic Apps are created but need workflow definitions."
-
-# Wait a moment for resources to be fully available
-print_status "Waiting 30 seconds for resources to be fully available..."
-sleep 30
-
-# Deploy Logic App Workflows (update existing Logic Apps created by Terraform)
-print_status "Deploying Logic App workflow definitions..."
-
-# Use the parameter-based deployment script
-if [[ -f "./deploy-logic-apps.sh" ]]; then
-    print_status "Using parameter-based deployment approach..."
-    ./deploy-logic-apps.sh deploy
-else
-    print_error "Parameter-based deployment script not found: ./deploy-logic-apps.sh"
-    print_error "Please ensure deploy-logic-apps.sh exists in the project root."
-    exit 1
-fi
-
 print_status "🎉 Deployment completed successfully!"
 print_status "📋 Summary:"
 print_status "  - Resource Group: $RESOURCE_GROUP"
 print_status "  - Location: $LOCATION"
 print_status "  - Storage Account: shdwagentstorage"
-print_status "  - Logic Apps: ${#logic_app_names[@]} deployed"
+print_status "  - Logic Apps: All workflows deployed with definitions"
 
 print_status "🔗 Next steps:"
-print_status "  1. Configure API connections in Azure Portal"
-print_status "  2. Set up OpenAI API key in Key Vault"
-print_status "  3. Test the entry Logic App endpoint"
+print_status "  1. Test the entry Logic App endpoint"
+print_status "  2. Monitor executions in Azure Portal"
+print_status "  3. Check AI Foundry usage in Azure AI Studio"
 print_status "  4. Monitor queue processing"
